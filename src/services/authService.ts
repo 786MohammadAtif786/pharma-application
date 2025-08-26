@@ -1,41 +1,45 @@
-import jwt from "jsonwebtoken";
-import { User, IUser } from "../models/User";
-import { Role } from "../enums/Role";
-import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/jwt";
-
-
+import { User } from "../models/User";
+import bcrypt from "bcrypt";
+import { generateToken } from "../utils/generateToken";
 
 class AuthService {
-  async register(data: { name: string; email: string; password: string }) {
-    const existing = await User.findOne({ email: data.email });
-    if (existing) throw new Error("Email already registered");
+  async register(data: any) {
+    const existingUser = await User.findOne({ email: data.email });
+    if (existingUser) throw new Error("Email already registered");
 
-    const user = await User.create(data);
-    const token = this.generateToken(user);
-    return { user, token };
+    const user = new User(data);
+    await user.save();
+
+    return { user };
   }
 
   async login(email: string, password: string) {
     const user = await User.findOne({ email }).select("+password");
-    if (!user) throw new Error("Invalid credentials");
+    if (!user) throw new Error("Invalid email or password");
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) throw new Error("Invalid credentials");
+    if (!isMatch) throw new Error("Invalid email or password");
 
-    const userObj = user.toObject();
-     user.lastLogin = new Date();
-     
-    const token = this.generateToken(user as IUser);
-    return { user: userObj, token };
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = generateToken(user.id, user.role);
+
+    return { user, token };
   }
 
-  generateToken(user: { _id: any; email?: string; role?: string }) {
-    return jwt.sign(
-      { sub: user._id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+  async changePassword(userId: string, newPassword: string) {
+    const user = await User.findById(userId).select("+password");
+    if (!user) throw new Error("User not found");
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.isFirstLogin = false; // ✅ mark first login complete
+    await user.save();
+
+    return { user };
   }
 }
 
-export default new AuthService();
+export const authService = new AuthService();
