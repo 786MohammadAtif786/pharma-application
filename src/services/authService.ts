@@ -20,7 +20,6 @@ class AuthService {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) throw new Error("Invalid email or password");
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save();
 
@@ -35,7 +34,7 @@ class AuthService {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.isFirstLogin = false; // ✅ mark first login complete
+    user.isFirstLogin = false;
     await user.save();
 
     return { user };
