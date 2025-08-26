@@ -1,32 +1,24 @@
 import { Request, Response } from "express";
-import { createAdmin, login } from "../services/authService";
+import authService from "../services/authService";
 
-export const registerAdmin = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response) => {
   try {
-    const admin = await createAdmin(req.body);
-    res.status(201).json({
-      success: true,
-      message: "Admin created successfully",
-      data: admin,
-    });
-  } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message });
+    const { name, email, password } = req.body;
+    const result = await authService.register({ name, email, password });
+    res.status(201).json({ user: result.user, token: result.token });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message || "Registration failed" });
   }
 };
 
-
-
-export const loginUser = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const { user, token } = await login(email, password);
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      data: user,
-    });
-  } catch (error: any) {
-    res.status(401).json({ success: false, message: error.message });
+    const result = await authService.login(email, password);
+    console.log(result);
+    
+    res.status(200).json({ user: result.user, token: result.token });
+  } catch (err: any) {
+    res.status(401).json({ message: err.message || "Login failed" });
   }
-}
+};

@@ -1,63 +1,41 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../models/User";
+import { User, IUser } from "../models/User";
 import { Role } from "../enums/Role";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/jwt";
 
-export const createAdmin = async (data: {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  address?: string;
-  profileImage?: string;
-  region?: string;
-  createdBy?: string;
-}) => {
-  const { name, email, password, phone, address, profileImage, region, createdBy } = data;
 
-  const existing = await User.findOne({ email });
-  if (existing) {
-    throw new Error("Admin with this email already exists");
+
+class AuthService {
+  async register(data: { name: string; email: string; password: string }) {
+    const existing = await User.findOne({ email: data.email });
+    if (existing) throw new Error("Email already registered");
+
+    const user = await User.create(data);
+    const token = this.generateToken(user);
+    return { user, token };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  async login(email: string, password: string) {
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) throw new Error("Invalid credentials");
 
-  const admin = new User({
-    name,
-    email,
-    password: hashedPassword,
-    phone,
-    address,
-    profileImage,
-    region,
-    role: Role.ADMIN,
-    createdBy,
-  });
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) throw new Error("Invalid credentials");
 
-  await admin.save();
+    const userObj = user.toObject();
+     user.lastLogin = new Date();
+     
+    const token = this.generateToken(user as IUser);
+    return { user: userObj, token };
+  }
 
-  return admin;
-};
+  generateToken(user: { _id: any; email?: string; role?: string }) {
+    return jwt.sign(
+      { sub: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+  }
+}
 
-export const login = async (email: string, password: string) => {
-  const user = await User.findOne({ email });
-  if (!user) throw new Error("User not found");
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Invalid credentials");
-
-  const token = jwt.sign(
-    { id: user._id, role: user.role },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-
-  user.lastLogin = new Date();
-   const userObj = user.toObject();
-    userObj.password;
-  await user.save();
-
-  return { user, token };
-};
-
+export default new AuthService();

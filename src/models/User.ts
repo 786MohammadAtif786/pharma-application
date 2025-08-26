@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import bcrypt from "bcrypt";
 import { Role } from "../enums/Role";
 
 export interface IUser extends Document {
@@ -19,6 +20,8 @@ export interface IUser extends Document {
     createdBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
+    comparePassword(candidatePassword: string): Promise<boolean>;
+
 
 }
 
@@ -26,7 +29,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     phone: { type: String },
     address: { type: String },
     profileImage: { type: String },
@@ -46,5 +49,32 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+
+
+userSchema.pre<IUser>("save", async function (next) {
+  const user = this as IUser;
+  if (!user.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
+  next();
+});
+
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  const user = this as IUser;
+  return bcrypt.compare(candidatePassword, user.password);
+};
+
+userSchema.set("toJSON", {
+  transform: function (_doc: any, ret: any) {
+    delete ret.password;
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    return ret;
+  }
+});
+
 
 export const User = mongoose.model<IUser>("User", userSchema);
