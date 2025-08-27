@@ -13,9 +13,14 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     }
 
     const token: any = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretKey") as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretKey") as {
+      userId: string;
+      role: string;
+      email: string;
+      name: string;
+    };
 
-    (req as any).user = decoded; // 👈 userId, role save in request
+    (req as any).user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ success: false, message: "Invalid or expired token" });

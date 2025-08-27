@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IMedicine extends Document {
+  email: any;
+  role: any;
   name: string;
   brand: string;
   category: string;
@@ -17,6 +19,7 @@ export interface IMedicine extends Document {
   createdBy?: mongoose.Types.ObjectId;
   updatedBy?: mongoose.Types.ObjectId;
   deletedBy?: mongoose.Types.ObjectId;
+  createdByName?: string;
   isDeleted: boolean;
   deletedAt?: Date;
   createdAt: Date;
@@ -42,11 +45,13 @@ const medicineSchema = new Schema<IMedicine>(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-
+    createdByName: {type: String},
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
   },
   { timestamps: true }
 );
+
+medicineSchema.index({ name: 1, brand: 1 }, { unique: true });
 
 export const Medicine = mongoose.model<IMedicine>("Medicines", medicineSchema);

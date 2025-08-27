@@ -14,9 +14,12 @@ export class MedicineController {
       const product = await medicineService.createMedicine({
         ...req.body,
         createdBy: req.user.userId,
+        createdByName: req.user.name
       });
       
       res.status(201).json(product);
+      console.log("userID", req.user);
+      
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
@@ -46,7 +49,7 @@ export class MedicineController {
       const updated = await medicineService.updateMedicine(
         req.params.id as string,
         req.body,
-        req.user._id
+        req.user.userId
       );
       if (!updated) return res.status(404).json({ message: "Product not found" });
       res.json(updated);
@@ -57,7 +60,7 @@ export class MedicineController {
 
   async deleteMedicine(req: AuthRequest, res: Response) {
     try {
-      const deleted = await medicineService.deleteMedicine(req.params.id as string, req.user._id);
+      const deleted = await medicineService.deleteMedicine(req.params.id as string, req.user.userId);
       if (!deleted) return res.status(404).json({ message: "Product not found" });
       res.json({ message: "Product deleted successfully" });
     } catch (error: any) {

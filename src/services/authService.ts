@@ -23,7 +23,7 @@ class AuthService {
     user.lastLogin = new Date();
     await user.save();
 
-    const token = generateToken(user.id, user.role);
+    const token = generateToken(user.id, user.role, user.email, user.name);
 
     return { user, token };
   }
