@@ -24,9 +24,15 @@ export class MedicineController {
     }
   }
 
-  async getAllMedicine(_req: Request, res: Response) {
+  async getAllMedicine(req: Request, res: Response) {
     try {
-      const products = await medicineService.getAllMedicine();
+          const { page = 1, limit = 10, search, brand } = req.query;
+      const products = await medicineService.getAllMedicine(
+          Number(page),
+          Number(limit),
+          search as string,
+          brand as string
+      );
       res.json(products);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
