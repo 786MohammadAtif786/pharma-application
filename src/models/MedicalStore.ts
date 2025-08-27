@@ -4,7 +4,7 @@ export interface IMrVisit {
   mrId: mongoose.Types.ObjectId;
   medicineId: mongoose.Types.ObjectId;
   quantity: number;
-  pricePerUnit: number;
+  price: number;
   totalAmount: number;                
   date: Date;
 }
@@ -22,7 +22,7 @@ const MrVisitSchema = new Schema<IMrVisit>(
     mrId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     medicineId: { type: mongoose.Schema.Types.ObjectId, ref: "Medicine", required: true },
     quantity: { type: Number, required: true },
-    pricePerUnit: { type: Number, required: true },
+    price: { type: Number },
     totalAmount: { type: Number },
     date: { type: Date, default: Date.now },
   },
@@ -31,7 +31,7 @@ const MrVisitSchema = new Schema<IMrVisit>(
 
 
 MrVisitSchema.pre("save", function (next) {
-  this.totalAmount = this.quantity * this.pricePerUnit;
+  this.totalAmount = this.quantity * this.price;
   next();
 });
 

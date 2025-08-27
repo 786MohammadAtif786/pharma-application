@@ -8,7 +8,7 @@ const router = Router();
 
 router.post("/create",authenticate, authorize(Role.ADMIN, Role.SALES_HEAD), medicalController.create);
 
-router.get("/",  medicalController.getAll);
+router.get("/allMedical",  medicalController.getAll);
 
 router.get("/:id", medicalController.getById);
 

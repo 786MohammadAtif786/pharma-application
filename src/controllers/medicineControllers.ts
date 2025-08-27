@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { medicineService } from "../services/medicineService";
 import { AuthRequest } from "../middleware/auth";
 
-
 interface IdParam {
   id: string;
 }

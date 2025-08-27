@@ -12,7 +12,7 @@ router.post("/medinice", authenticate, authorize(Role.ADMIN, Role.SALES_HEAD), (
 );
 
 // Get all products (public or logged-in users)
-router.get("/", (req, res) => medicineController.getAllMedicine(req, res));
+router.get("/allMedicine", (req, res) => medicineController.getAllMedicine(req, res));
 
 // Get single product
 router.get("/:id", (req, res) => medicineController.getMedicineById(req, res));

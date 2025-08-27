@@ -34,10 +34,10 @@ export const medicalController = {
   async addMrVisit(req: AuthRequest, res: Response) {
     try {
       const { medicalId } = req.params;
-          const { medicineId, quantity, pricePerUnit } = req.body;
+          const { medicineId, quantity } = req.body;
           const mrId = req.user.userId;
 
-      const medical = await medicalService.addMrVisit(medicalId as string, { medicineId, quantity, pricePerUnit, mrId });
+      const medical = await medicalService.addMrVisit(medicalId as string, { medicineId, quantity, mrId });
       res.json(medical);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
