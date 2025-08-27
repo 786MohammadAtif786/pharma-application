@@ -56,4 +56,37 @@ export const medicalService = {
     await medical.save();
     return medical;
   },
+
+
+  async getTopMedicinesByMR(mrId: string) {
+    return await Medical.aggregate([
+      { $unwind: "$mrVisits" },
+      { $match: { "mrVisits.mrId": new mongoose.Types.ObjectId(mrId) } },
+      {
+        $group: {
+          _id: "$mrVisits.medicineId",
+          totalQuantity: { $sum: "$mrVisits.quantity" },
+        },
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "medicines",
+          localField: "_id",
+          foreignField: "_id",
+          as: "medicine",
+        },
+      },
+      { $unwind: "$medicine" },
+      {
+        $project: {
+          _id: 0,
+          medicineId: "$_id",
+          medicineName: "$medicine.name",
+          totalQuantity: 1,
+        },
+      },
+    ]);
+  },
 };

@@ -6,36 +6,6 @@ class MedicineService {
     return await medicine.save();
   }
   async getAllMedicine(page: number, limit: number, search?: string, brand?: string) {
-  //   const query: any = { isDeleted: false }; 
-  //    // search by name (case-insensitive)
-  // if (search) {
-  //   query.name = { $regex: search, $options: "i" };
-  // }
-
-  // // filter by brand
-  // if (brand) {
-  //   query.brand = { $regex: brand, $options: "i" };
-  // }
-
-  // const skip = (page - 1) * limit;
-
-  // const medicines = await Medicine.find(query)
-  //   .sort({ createdAt: -1 }) // latest first
-  //   .skip(skip)
-  //   .limit(limit);
-
-  // const total = await Medicine.countDocuments(query);
-
-  // return {
-  //   data: medicines,
-  //   total,
-  //   page,
-  //   pages: Math.ceil(total / limit),
-  // };
-  //   return Medicine.find({ isDeleted: false });
-  // }
-// medicine.service.ts
-// async getMedicines(page: number, limit: number, search?: string, brand?: string) {
   const query: any = { isDeleted: false }; // only active medicines
 
   // search by name (case-insensitive)

@@ -13,5 +13,6 @@ router.get("/allMedical",  medicalController.getAll);
 router.get("/:id", medicalController.getById);
 
 router.post("/:medicalId/visits", authenticate, authorize(Role.MR), medicalController.addMrVisit);
+router.get("/mr/:id/top-medicines", medicalController.getTopMedicinesByMR);
 
 export default router;

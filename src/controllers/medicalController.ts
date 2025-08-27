@@ -43,4 +43,13 @@ export const medicalController = {
       res.status(500).json({ message: error.message });
     }
   },
+   async getTopMedicinesByMR(req: Request, res: Response) {
+    try {
+      const  { id  }   = req.params;
+      const topMedicines = await medicalService.getTopMedicinesByMR(id as string);
+      res.json(topMedicines);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  }
 };
